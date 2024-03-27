@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BLOCK_SIZE 8
+void encrypt_xor_cbc(unsigned char *plaintext, int plaintext_len, unsigned char *key, unsigned char *iv, unsigned char *ciphertext) {
+    int i;
+    for (i = 0; i < plaintext_len; i += BLOCK_SIZE) {
+        for (int j = 0; j < BLOCK_SIZE; j++) {
+            ciphertext[i + j] = plaintext[i + j] ^ iv[j];
+        }
+        memcpy(iv, ciphertext + i, BLOCK_SIZE);
+    }
+}
+
+int main() {
+    unsigned char key[8] = "password";
+    unsigned char iv[8] = "12345678";
+    unsigned char plaintext[] = "Hello World";
+    int plaintext_len = strlen((char *)plaintext);
+    int padding_len = BLOCK_SIZE - (plaintext_len % BLOCK_SIZE);
+    if (padding_len != BLOCK_SIZE) {
+        plaintext_len += padding_len;
+        memset(plaintext + strlen((char *)plaintext), padding_len, padding_len);
+    }
+
+    unsigned char ciphertext[plaintext_len];
+
+    encrypt_xor_cbc(plaintext, plaintext_len, key, iv, ciphertext);
+
+    printf("Plaintext: %s\n", plaintext);
+    printf("Ciphertext: ");
+    for (int i = 0; i < plaintext_len; i++) {
+        printf("%02X", ciphertext[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
